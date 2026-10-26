@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Case Study: SerClean / Restoration Desk — Monza Cloud</title>
+<style>
+  /* ============================================================
+     MONZA CLOUD — SERCLEAN / RESTORATION DESK CASE STUDY
+     4-page layout. Natural flow + controlled page breaks.
+     Print to PDF at Letter size, margins None, backgrounds ON.
+     Palette:  navy #16205a / #1b2a6b   cyan #29b6d8 / #35c6e6
+     Yellow = placeholder to replace. Hatched = screenshot slot.
+     ============================================================ */
+  :root {
+    --navy:#16205a; --navy-2:#1b2a6b; --cyan:#29b6d8; --cyan-light:#35c6e6;
+    --ink:#2b2f45; --grey:#5a6072; --soft:#f4f6fb; --cream:#f7f1ee;
+    --line:#e2e6f0;
+  }
+  * { box-sizing:border-box; }
+  html { background:#6a7290; }
+  body {
+    margin:0; color:var(--ink); line-height:1.5; font-size:10.3pt;
+    font-family:"Segoe UI","Helvetica Neue",Arial,system-ui,sans-serif;
+  }
+
+  /* Each .page is exactly one Letter sheet. */
+  .page {
+    width:8.5in; height:10.98in; background:#fff; margin:22px auto;
+    position:relative; overflow:hidden;
+    box-shadow:0 10px 40px rgba(0,0,0,.35);
+    display:flex; flex-direction:column;
+  }
+  .pad { padding:0 0.62in; }
+  .grow { flex:1 1 auto; }
+
+  h1,h2,h3,h4 { font-weight:800; line-height:1.14; margin:0; }
+  .section-kicker { color:var(--navy); font-weight:800; font-size:8pt; letter-spacing:2px; text-transform:uppercase; margin:16px 0 1px; }
+  .section-title { color:var(--cyan); font-size:15pt; margin:1px 0 6px; }
+  p { margin:0 0 8px; }
+  .lead { font-size:10.8pt; }
+  strong { color:var(--navy); }
+  em { font-style:italic; }
+  a { color:var(--cyan); text-decoration:none; border-bottom:1px solid var(--cyan); }
+
+  /* ---- HERO ---- */
+  .hero { background:linear-gradient(135deg,var(--navy) 0%,var(--navy-2) 60%,#243a8a 100%); color:#fff; padding:0 0 10px; flex:0 0 auto; }
+  .brandbar { display:flex; justify-content:space-between; align-items:flex-start; padding:26px 0.62in 0; }
+  .logo { display:flex; align-items:center; gap:11px; }
+  .logo .mark { width:42px; height:30px; flex:0 0 auto; }
+  .logo .mark svg { width:100%; height:100%; display:block; }
+  .logo .stack { display:flex; flex-direction:column; letter-spacing:4px; font-weight:800; font-size:12pt; line-height:1.05; }
+  .logo .stack span:last-child { color:var(--cyan-light); }
+  .csbadge { text-align:right; }
+  .csbadge .k { font-size:8pt; letter-spacing:2.5px; color:#aeb7dd; font-weight:700; text-transform:uppercase; }
+  .csbadge .v { font-size:13pt; font-weight:800; }
+  .hero-body { padding:26px 0.62in 6px; }
+  .hero h1 { font-size:27pt; letter-spacing:-.4px; max-width:7.1in; }
+  .hero .sub { color:var(--cyan-light); font-size:11.5pt; font-weight:600; font-style:italic; margin-top:12px; max-width:6.3in; }
+  .waves { line-height:0; } .waves svg { width:100%; display:block; }
+
+  /* ---- STAT PANEL ---- */
+  .glance { margin:-26px 0.62in 0; position:relative; z-index:5; background:#fff; border:1px solid var(--line); border-radius:12px; box-shadow:0 12px 30px rgba(22,32,90,.14); padding:15px 16px 9px; flex:0 0 auto; }
+  .glance h4 { color:var(--navy); font-size:8pt; letter-spacing:2px; text-transform:uppercase; margin-bottom:10px; }
+  .stats { display:grid; grid-template-columns:repeat(5,1fr); gap:6px; }
+  .stat { padding:3px 7px; border-left:3px solid var(--cyan); }
+  .stat .num { font-size:18pt; font-weight:800; color:var(--navy); line-height:1; }
+  .stat .lbl { font-size:7.3pt; color:var(--grey); margin-top:5px; text-transform:uppercase; letter-spacing:.4px; line-height:1.25; }
+  .meta { display:grid; grid-template-columns:repeat(4,1fr); gap:9px; margin:11px 0.62in 0; flex:0 0 auto; }
+  .meta .cell { border-top:2px solid var(--cyan); padding-top:5px; }
+  .meta .cell .k { font-size:7pt; letter-spacing:1.1px; text-transform:uppercase; color:var(--cyan); font-weight:800; }
+  .meta .cell .v { font-size:9.3pt; color:var(--navy); font-weight:700; line-height:1.25; }
+
+  .two-col { column-count:2; column-gap:24px; }
+  .two-col p { break-inside:avoid; }
+
+  .callout { background:var(--soft); border-left:5px solid var(--cyan); border-radius:0 9px 9px 0; padding:13px 18px; margin:12px 0; }
+  .callout .q { font-size:12.5pt; font-weight:700; color:var(--navy-2); font-style:italic; line-height:1.32; }
+  .callout .who { margin-top:7px; font-size:9pt; color:var(--grey); font-weight:700; }
+
+  .why { background:#eef2fb; border-left:5px solid var(--navy); border-radius:0 9px 9px 0; padding:12px 18px; margin:12px 0; }
+  .why .t { font-weight:800; color:var(--navy); font-size:11pt; margin-bottom:3px; }
+  .why p { margin:0; font-size:9.8pt; }
+
+  .ph { background:#fff3bf; color:#8a6d00; border:1px dashed #d9b400; border-radius:4px; padding:0 5px; font-weight:700; font-size:.92em; }
+
+  .crit { display:grid; grid-template-columns:1fr 1fr; gap:6px 24px; margin:4px 0 8px; }
+  .crit p { margin:0; font-size:9.8pt; }
+
+  .stages { margin:4px 0; }
+  .stage { display:flex; gap:12px; margin:0 0 9px; break-inside:avoid; }
+  .stage .n { flex:0 0 auto; width:27px; height:27px; border-radius:50%; background:var(--cyan); color:#fff; font-weight:800; font-size:10.5pt; display:flex; align-items:center; justify-content:center; }
+  .stage .body h4 { color:var(--navy); font-size:10.8pt; margin-bottom:1px; }
+  .stage .body p { margin:0; font-size:9.8pt; }
+
+  .result-row { display:flex; gap:13px; align-items:flex-start; margin:0 0 11px; break-inside:avoid; }
+  .result-row .ic { flex:0 0 auto; width:44px; height:44px; border-radius:50%; background:var(--cyan); display:flex; align-items:center; justify-content:center; }
+  .result-row .ic svg { width:23px; height:23px; fill:#fff; }
+  .result-row h4 { color:var(--cyan); font-size:12pt; margin-bottom:1px; }
+  .result-row p { margin:0; font-size:9.9pt; }
+
+  .shots2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin:8px 0; }
+  .shot { border:2px dashed #b9c2dd; background:repeating-linear-gradient(45deg,#f4f6fb,#f4f6fb 10px,#eef1f9 10px,#eef1f9 20px); border-radius:8px; height:132px; display:flex; align-items:center; justify-content:center; color:#8a93b4; font-size:8.6pt; font-weight:700; text-align:center; }
+
+  .band { background:linear-gradient(135deg,var(--navy) 0%,var(--navy-2) 100%); color:#fff; border-radius:13px; padding:18px 24px; margin:12px 0; }
+  .band .section-kicker { color:#aeb7dd; margin-top:0; }
+  .band .section-title { color:var(--cyan-light); margin-top:1px; }
+  .band p { color:#dfe4f6; font-size:9.9pt; }
+  .band strong { color:#fff; }
+  .band a { color:var(--cyan-light); border-color:var(--cyan-light); }
+
+  .cta { background:var(--cream); border-radius:13px; padding:20px 26px; margin:14px 0 0; text-align:center; }
+  .cta h3 { color:var(--navy); font-size:15pt; margin-bottom:6px; }
+  .cta p { color:var(--grey); max-width:5.3in; margin:0 auto 11px; font-size:10pt; }
+  .cta .btn { display:inline-block; background:var(--cyan); color:#fff; font-weight:800; padding:10px 22px; border-radius:30px; letter-spacing:.3px; border-bottom:none; }
+
+  .footer { background:var(--navy); color:#c3cae6; padding:16px 0.62in; display:flex; gap:18px; align-items:center; font-size:8.5pt; line-height:1.45; flex:0 0 auto; }
+  .footer .logo .stack { font-size:10pt; }
+  .footer a { color:var(--cyan-light); border-color:var(--cyan-light); }
+
+  .pagenum { position:absolute; bottom:11px; right:0.62in; color:#b7bed6; font-size:7.5pt; }
+
+  /* ---- FEATURE SHOWCASE ---- */
+  .feat { display:flex; gap:13px; margin:0 0 11px; break-inside:avoid; }
+  .feat .tag { flex:0 0 auto; width:26px; height:26px; border-radius:7px; background:var(--cyan); color:#fff; display:flex; align-items:center; justify-content:center; }
+  .feat .tag svg { width:15px; height:15px; fill:#fff; }
+  .feat .body h4 { color:var(--navy); font-size:11.2pt; margin-bottom:1px; }
+  .feat .body h4 .pill { font-size:7pt; font-weight:800; letter-spacing:.6px; text-transform:uppercase; color:var(--cyan); border:1px solid var(--cyan); border-radius:20px; padding:1px 7px; margin-left:7px; vertical-align:middle; }
+  .feat .body p { margin:0; font-size:9.7pt; }
+
+  .figure { margin:4px 0 12px; break-inside:avoid; }
+  .figure .frame { border:1px solid var(--line); border-radius:9px; overflow:hidden; box-shadow:0 8px 20px rgba(22,32,90,.12); background:#fff; }
+  .figure .frame img { width:100%; display:block; }
+  .figure .slot { border:2px dashed #b9c2dd; background:repeating-linear-gradient(45deg,#f4f6fb,#f4f6fb 10px,#eef1f9 10px,#eef1f9 20px); border-radius:9px; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#8a93b4; font-size:8.6pt; font-weight:700; text-align:center; padding:10px; }
+  .figure .cap { font-size:8pt; color:var(--grey); margin-top:5px; line-height:1.35; }
+  .figure .cap b { color:var(--navy); }
+
+  @media print {
+    html, body { background:#fff; margin:0; padding:0; }
+    .page { margin:0 !important; box-shadow:none; height:11in; overflow:hidden; break-inside:avoid; page-break-inside:avoid; }
+    .screen-only { display:none !important; }
+    @page { size:Letter; margin:0; }
+  }
+  .screen-only { max-width:8.5in; margin:10px auto; color:#e7ebff; font-size:9.5pt; background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.15); border-radius:10px; padding:11px 15px; }
+  .screen-only code { background:rgba(255,255,255,.12); padding:1px 5px; border-radius:4px; }
+</style>
+</head>
+<body>
+
+<div class="screen-only">
+  <strong>PREVIEW MOCKUP (5 pages).</strong> Yellow <span style="background:#fff3bf;color:#8a6d00;border:1px dashed #d9b400;border-radius:4px;padding:0 5px;">highlighted</span> = placeholder to replace. Hatched boxes = screenshot slots (drop cleaned rdss1/rdss2 images in). To export: open in a browser → <code>Print</code> → <code>Save as PDF</code> (Letter, margins "None", enable "Background graphics").
+</div>
+
+<!-- ============ PAGE 1 ============ -->
+<section class="page">
+  <div class="hero">
+    <div class="brandbar">
+      <div class="logo">
+        <span class="mark"><svg viewBox="0 0 92 64"><path fill="#fff" d="M70 30c-1-11-10-20-22-20-9 0-17 6-20 14-8 0-15 6-15 14 0 8 7 14 15 14h40c9 0 16-7 16-16 0-6-5-11-14-10z"/><path fill="#35c6e6" d="M34 40h30v4H34z"/></svg></span>
+        <span class="stack"><span>MONZA</span><span>CLOUD</span></span>
+      </div>
+      <div class="csbadge"><div class="k">Case Study</div><div class="v">Restoration Desk</div></div>
+    </div>
+    <div class="hero-body">
+      <h1>15 Systems Were Capping Growth. Monza Built the One That Didn't.</h1>
+      <div class="sub">How Monza Cloud turned a back-office bottleneck into a scalable platform for SerClean — eliminating inefficiency, enabling growth, and creating lasting value.</div>
+    </div>
+    <div class="waves" style="margin-top:14px;">
+      <svg viewBox="0 0 1440 90" preserveAspectRatio="none" height="60">
+        <path fill="#35c6e6" d="M0,40 C240,90 480,0 720,30 C960,60 1200,10 1440,40 L1440,90 L0,90 Z" opacity=".55"/>
+        <path fill="#ffffff" d="M0,55 C240,95 480,25 720,50 C960,75 1200,35 1440,60 L1440,90 L0,90 Z"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="glance">
+    <h4>Results at a Glance</h4>
+    <div class="stats">
+      <div class="stat"><div class="num">15&#8594;1</div><div class="lbl">Systems replaced</div></div>
+      <div class="stat"><div class="num">22</div><div class="lbl">Service areas (was 6 states)</div></div>
+      <div class="stat"><div class="num">~325</div><div class="lbl">Jobs per week</div></div>
+      <div class="stat"><div class="num">+30%</div><div class="lbl">Job volume growth the platform supported</div></div>
+      <div class="stat"><div class="num" style="font-size:12pt;line-height:1.1;">Acquired<br>&amp; retained</div><div class="lbl">Carried into High Ground</div></div>
+    </div>
+  </div>
+  <div class="meta">
+    <div class="cell"><div class="k">Client</div><div class="v">SerClean, Inc. <span style="font-weight:500;color:var(--grey);font-size:8pt;">(now part of High Ground)</span></div></div>
+    <div class="cell"><div class="k">Industry</div><div class="v">Disaster restoration &amp; remediation</div></div>
+    <div class="cell"><div class="k">Partner</div><div class="v">Monza Cloud · Microsoft Azure</div></div>
+    <div class="cell"><div class="k">Platform</div><div class="v">Restoration Desk</div></div>
+  </div>
+
+  <div class="pad grow">
+    <div class="section-kicker">01 — The Company</div>
+    <p class="lead">SerClean provides water extraction, mold removal, fire restoration, and disaster-recovery services to homeowners and businesses. What began in Savannah, Georgia grew into one of the Southeast's largest independently-owned restoration firms — today serving <strong>22 areas</strong> across the region.</p>
+    <p>Restoration isn't a scheduled business. When a storm, flood, or fire hits, SerClean mobilizes crews, trucks, and specialized equipment on short notice — often around the clock. And because most work is reimbursed through insurance claims, every job must be documented to the standard an insurer will pay against. That combination — emergency dispatch plus claim-grade proof of work — is the reality the software had to serve.</p>
+
+    <div class="section-kicker">02 — The Challenge</div>
+    <h2 class="section-title">Growth Created a Tangle of 15 Systems</h2>
+    <div class="two-col">
+      <p>Fast growth multiplies the back-office work that keeps the front office running — scheduling, inventory, IT, accounting, HR, and partner integrations. Handled well, these functions power growth. Handled badly, they quietly cap it.</p>
+      <p>SerClean started simple: email chains and single-purpose tools for communication, inventory, contracts, and invoicing. It worked — until it didn't. As job volume climbed across multiple states, the threads buckled. Too many trucks, too much equipment, too many simultaneous jobs to track by hand. <strong>SerClean started losing money to misplaced equipment and unbilled work.</strong></p>
+      <p>The patch was more tools, not fewer: Dropbox, Google Sheets, and a dozen more point solutions — each reasonable alone, none talking to the others. At its peak the business ran on <strong>roughly 15 disconnected systems</strong>, and the in-house IT team couldn't make them act as one.</p>
+      <p>The off-the-shelf suites didn't fit either. Platforms like ServiceTitan are built around pre-booked appointments — good for plumbing, HVAC, and pool services that know their week in advance. Restoration is the opposite: emergency-driven, equipment-heavy, and billed <em>backwards</em> — paid later, through insurance claims, only once the work is proven.</p>
+    </div>
+  </div>
+  <div class="pagenum">Monza Cloud · SerClean Case Study · 1</div>
+</section>
+
+<!-- ============ PAGE 2 ============ -->
+<section class="page">
+  <div class="pad grow" style="padding-top:0.42in;">
+    <div class="callout">
+      <div class="q">"We wanted to reduce our overhead, improve our profitability, and stay organized. We wanted a one-app solution built for a company exactly like ours."</div>
+      <div class="who">— Michael Mock, Founder, SerClean</div>
+    </div>
+    <p>The cost showed up as a staffing problem. Early on, one office employee could support ten service vans; under the weight of 15 systems, SerClean needed one for roughly every <strong>two</strong>. The back-office software was the bottleneck — and the choice was stark: find one system to run the whole business, or stall.</p>
+
+    <div class="section-kicker">03 — The Partner</div>
+    <h2 class="section-title">Choosing Monza Cloud</h2>
+    <p>SerClean didn't build software. To create a platform tailored to restoration, founder Michael Mock set firm criteria for a development partner:</p>
+    <div class="crit">
+      <p><strong>Long-term value</strong> — an investment that cuts overhead and travels to new locations, not another disposable tool.</p>
+      <p><strong>Robustness</strong> — in an emergency business, downtime costs revenue and reputation.</p>
+      <p><strong>Direct communication</strong> — a partner he could talk to and meet in person, not an offshore team.</p>
+      <p><strong>A fit for a non-technical company</strong> — a solution for a business that doesn't run its own IT.</p>
+    </div>
+    <p>After talking with owners in similar industries and vetting the entire marketplace for any commercial offerings, Michael chose <strong>Monza Cloud</strong> — an Atlanta-based, AI and cloud-centered firm capable of building him the customization his business needed.</p>
+
+    <div class="why">
+      <div class="t">Why "Restoration Desk"?</div>
+      <p>Named deliberately, after a term the industry already knows — a statement that the category finally had software of its own. To this day there's no off-the-shelf product built for restoration the way Restoration Desk is. The platforms it's compared to — ServiceTitan, Dash — are built for other trades and ill-serve an industry where billing runs backwards through insurance claims.</p>
+    </div>
+
+    <div class="section-kicker">04 — The Build</div>
+    <h2 class="section-title">Prove It, Deliver Relief, Then Expand</h2>
+    <p><strong>Monza doesn't just build software — we solve business problems through custom development, helping companies eliminate inefficiencies, scale operations, and create long-term value.</strong> For SerClean, that meant scoping the work in stages — learning the real pain in each function, then replacing the old tools one at a time, hardest problems first, each stage chosen to retire cost and unlock capacity rather than chase features.</p>
+    <div class="stages">
+      <div class="stage"><div class="n">1</div><div class="body"><h4>Prove it out</h4><p>Prototyped and validated the approach against SerClean's real dispatch and equipment-tracking workflows — confirming the model worked before committing to a full build, and building mutual trust.</p></div></div>
+      <div class="stage"><div class="n">2</div><div class="body"><h4>First real relief</h4><p>A cloud-hosted web and mobile app to track jobs and equipment, schedule appointments, and capture <strong>claim-grade proof of work</strong> — the documentation insurers require before they pay. Delivered on time at a fixed fee and scope, this was when the daily pain started to lift.</p></div></div>
+      <div class="stage"><div class="n">3</div><div class="body"><h4>Expand &amp; deepen</h4><p>In short, iterative sprints, Monza layered in the rest of the business — invoicing, workflow, reporting, referrals, administration, multi-tenancy, and a full CRM replacement — steadily retiring the old 15-system web.</p></div></div>
+    </div>
+  </div>
+  <div class="pagenum">Monza Cloud · SerClean Case Study · 2</div>
+</section>
+
+<!-- ============ PAGE 3 : FEATURE SHOWCASE (part 1) ============ -->
+<section class="page">
+  <div class="pad grow" style="padding-top:0.5in;">
+    <div class="section-kicker">05 — What Monza Engineered</div>
+    <h2 class="section-title">Purpose-Built to Remove Work, Not Add Features</h2>
+    <p>Monza didn't hand SerClean a generic toolkit. Every capability was engineered to attack a specific business cost — lost equipment, unbilled work, manual re-entry, or the staffing creep that was capping growth. The result is a platform the restoration industry has never had off the shelf. Two capabilities show the pattern.</p>
+
+    <div class="feat">
+      <div class="tag"><svg viewBox="0 0 24 24"><path d="M3 3h8v8H3zm10 0h8v5h-8zm0 7h8v11h-8zM3 13h8v8H3z"/></svg></div>
+      <div class="body">
+        <h4>Boards <span class="pill">Outcome: faster decisions, less rework</span></h4>
+        <p>Monza built role-based "boards" so every department — management, billing, field ops, equipment — sees exactly the data it needs, live. The business impact: sharply higher day-to-day productivity and fewer things falling through the cracks.</p>
+      </div>
+    </div>
+
+    <div class="figure">
+      <div class="frame">
+        <img src="images/rdss1.jpg" alt="Restoration Desk Job Board" />
+      </div>
+      <div class="cap"><b>The Job Board.</b> One of many role-based views Monza engineered — live job, field, and billing status at a glance — so each team runs its part of the business from a single screen instead of chasing updates across tools.</div>
+    </div>
+
+    <div class="feat">
+      <div class="tag"><svg viewBox="0 0 24 24"><path d="M4 4h7v7H4zm9 0h7v7h-7zM4 13h7v7H4zm9 2h7v2h-7zm0 4h7v2h-7z"/></svg></div>
+      <div class="body">
+        <h4>Trays <span class="pill">Outcome: zero re-entry, instant context</span></h4>
+        <p>Linked "tray" windows surface every facet of a job — appointments, equipment, billing, photo documentation, reports — and stay in sync with the boards. Selecting a job instantly deep-dives it, eliminating the re-navigation and duplicate data entry that used to drain staff hours.</p>
+      </div>
+    </div>
+
+    <div class="why" style="margin-top:4px;">
+      <div class="t">The business impact</div>
+      <p>Before Monza, SerClean needed roughly one office worker for every two service vans — overhead that rose with every job won. By consolidating 15 disconnected tools into one engineered system, Monza broke that link between growth and headcount: SerClean later absorbed a <strong>30% rise in job volume with no matching rise in back-office staff</strong>. That is the difference between software that stores data and software that removes work.</p>
+    </div>
+  </div>
+  <div class="pagenum">Monza Cloud · SerClean Case Study · 3</div>
+</section>
+
+<!-- ============ PAGE 4 : FEATURE SHOWCASE (part 2) + RESULTS ============ -->
+<section class="page">
+  <div class="pad grow" style="padding-top:0.5in;">
+    <div class="figure" style="margin-top:0;">
+      <div class="frame">
+        <img src="images/rdss2.jpg" alt="Restoration Desk Trays — multiple linked job windows" />
+      </div>
+      <div class="cap"><b>Trays in action.</b> Multiple linked windows — affected areas, demo, appointments, documents, equipment — open simultaneously for a single job, giving the user a full operational picture at once. The complete set of available Tray windows includes affected areas, appointments, chat, demo, documents, equipment, important dates, invoicing, job info, notes, payments, a PDF queue, pictures, quick details, and referral info.</div>
+    </div>
+
+    <div class="feat">
+      <div class="tag"><svg viewBox="0 0 24 24"><path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4zm0 2c-4 0-8 2-8 5v3h16v-3c0-3-4-5-8-5zm7-2 1.5-1.5L19 9l1.5-1.5L22 9l-1.5 1.5L22 12l-1.5 1.5z"/></svg></div>
+      <div class="body">
+        <h4>Referral management <span class="pill">Outcome: more measurable revenue</span></h4>
+        <p>Monza built a lightweight, restoration-specific CRM and payment platform around the referral network that drives SerClean's business — tracking payments, performance, and campaign results so the relationships that generate revenue are actively managed, not left to memory.</p>
+      </div>
+    </div>
+
+    <div class="feat">
+      <div class="tag"><svg viewBox="0 0 24 24"><path d="M3 13h4v8H3zm7-6h4v14h-4zm7-4h4v18h-4z"/></svg></div>
+      <div class="body">
+        <h4>Analytics &amp; dispatch visibility <span class="pill">Outcome: run the whole business on one screen</span></h4>
+        <p>Monza engineered reporting to run off a separate copy of the data, so leadership can see the company's entire current and planned operations on a single dashboard — without ever slowing the live system the field depends on.</p>
+      </div>
+    </div>
+
+    <div class="feat">
+      <div class="tag"><svg viewBox="0 0 24 24"><path d="M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm5 17a1.2 1.2 0 1 0 1.2 1.2A1.2 1.2 0 0 0 12 19zM7 5v12h10V5z"/></svg></div>
+      <div class="body">
+        <h4>Mobile field operations <span class="pill">Outcome: consistent work, fewer errors</span></h4>
+        <p>The mobile app runs nearly all technician and vehicle work — jobs, equipment, reporting, invoicing, communications. Its standout advance is <strong>configurable checklists</strong> per franchise and job type that local managers can adjust on the fly, standardizing quality as staffing or legal requirements change.</p>
+      </div>
+    </div>
+
+    <div class="section-kicker">06 — The Results</div>
+    <h2 class="section-title">A Platform Proven Over Years</h2>
+    <p style="font-size:9.8pt;">With the platform in place, SerClean grew weekly job volume from roughly 250 to <strong>~325 — a 30% increase</strong> — through years that punished the wider restoration trade, where operators named skilled-labor shortages, rising supply costs, and inflation as their top challenges and turnover ran near 28%.<span style="vertical-align:super;font-size:7pt;color:var(--cyan);">1</span> The software didn't win the work, but it removed the back-office ceiling that would have made absorbing that growth impossible.</p>
+    <div class="result-row">
+      <div class="ic"><svg viewBox="0 0 24 24"><path d="M3 13h2v7H3zm4-4h2v11H7zm4-4h2v15h-2zm4 8h2v7h-2zm4-11h2v18h-2z"/></svg></div>
+      <div><h4>More scalable</h4><p>The platform let SerClean absorb the full 30% rise in job volume without a matching rise in back-office staff — breaking the old pattern where every few service vans demanded another office hire.</p></div>
+    </div>
+    <div class="result-row">
+      <div class="ic"><svg viewBox="0 0 24 24"><path d="M12 1 3 5v6c0 5 3.8 9.7 9 11 5.2-1.3 9-6 9-11V5l-9-4zm-1 14-4-4 1.4-1.4L11 12.2l5.6-5.6L18 8l-7 7z"/></svg></div>
+      <div><h4>More resilient</h4><p>Cloud-hosted on Azure, Restoration Desk isn't exposed to local outages, and Monza Cloud monitors and resolves issues remotely — so SerClean stays available exactly when disaster strikes.</p></div>
+    </div>
+    <div class="result-row">
+      <div class="ic"><svg viewBox="0 0 24 24"><path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm-9 14-5-5 1.4-1.4L10 14.2l7.6-7.6L19 8l-9 9z"/></svg></div>
+      <div><h4>Leaner back office</h4><p>The 15-system tangle is effectively gone — anything that survives is used in trace amounts and no longer central to running the business.</p></div>
+    </div>
+  </div>
+  <div class="pagenum">Monza Cloud · SerClean Case Study · 4</div>
+</section>
+
+<!-- ===PAGE5MARKER=== -->
+<section class="page">
+  <div class="pad grow" style="padding-top:0.5in;">
+    <div class="band">
+      <div class="section-kicker">07 — The Validation</div>
+      <h2 class="section-title">Acquired, Retained, and Built to Scale</h2>
+      <p>An independent verdict on what Monza built came when SerClean was acquired by <a href="https://highgroundnow.com/">High Ground</a> and brought into its national family of restoration brands. Software built for one company doesn't always survive that transition — much of it gets ripped out and replaced with the acquirer's standards. <strong>Restoration Desk did the opposite: it was valued enough to be kept, invested in, and still shipping new capabilities under its new owner.</strong></p>
+      <p style="margin-bottom:0;">In fact, the platform was recognized as an asset in its own right — valuable enough that High Ground acquired ownership of the software specifically, separate from the SerClean purchase. In an industry with no purpose-built alternative, a single platform that could one day run multiple brands is a tremendous asset, and the door is open to a shared advantage across the group. For a prospective client, the lesson isn't about one acquisition — it's that custom software built the right way becomes a durable, transferable business asset.</p>
+    </div>
+
+    <div class="callout" style="margin-top:10px;">
+      <div class="q"><span class="ph">[Second quote — Aaron Dunckel on the business impact of what Monza built / the partnership. Drop in when available, or delete this block.]</span></div>
+      <div class="who">— Aaron Dunckel, <span class="ph">[title]</span>, High Ground / Restoration Desk</div>
+    </div>
+
+    <div class="section-kicker">08 — The Takeaway</div>
+    <h2 class="section-title">Monza Solves Business Problems — With Software</h2>
+    <p>A tangle of disconnected tools charges a tax every day: lost data, manual rework, headcount that scales faster than revenue, and a ceiling on how big you can get. SerClean faced exactly that — and chose to build instead of settle.</p>
+    <p>What Monza delivered wasn't just an app — it was a solution to a business problem: inefficiencies eliminated, operations scaled without added overhead, and a lasting asset valuable enough to be acquired on its own. <strong>That's the Monza difference — we solve business problems through custom development that eliminates waste, scales operations, and creates long-term value.</strong></p>
+
+    <div class="cta">
+      <h3>What's the business problem your software should be solving?</h3>
+      <p>Monza Cloud builds tailored systems that replace inefficiency with scale — turning the way <em>your</em> business actually works into a durable competitive asset.</p>
+      <a class="btn" href="https://www.monzacloud.com">Let's talk about yours →</a>
+    </div>
+
+    <p style="font-size:7pt;color:#9aa1b5;line-height:1.4;margin-top:14px;margin-bottom:0;">
+      <span style="vertical-align:super;">1</span> Industry context: R&amp;R Magazine 2024 R&amp;R 360 Industry Outlook (top operator challenges: finding skilled workers, supply costs, inflation); property-restoration labor-shortage and ~28% turnover figures per industry statistics compilations (IBISWorld / Mordor Intelligence, 2023–2025). Figures cited for market context only. <em>Content paraphrased for licensing compliance.</em>
+    </p>
+  </div>
+
+  <div class="waves">
+    <svg viewBox="0 0 1440 90" preserveAspectRatio="none" height="52">
+      <path fill="#35c6e6" d="M0,50 C240,10 480,80 720,45 C960,10 1200,70 1440,40 L1440,90 L0,90 Z" opacity=".5"/>
+      <path fill="#16205a" d="M0,60 C240,25 480,85 720,55 C960,25 1200,80 1440,55 L1440,90 L0,90 Z"/>
+    </svg>
+  </div>
+  <div class="footer">
+    <div class="logo">
+      <span class="mark"><svg viewBox="0 0 92 64"><path fill="#fff" d="M70 30c-1-11-10-20-22-20-9 0-17 6-20 14-8 0-15 6-15 14 0 8 7 14 15 14h40c9 0 16-7 16-16 0-6-5-11-14-10z"/><path fill="#35c6e6" d="M34 40h30v4H34z"/></svg></span>
+      <span class="stack"><span>MONZA</span><span>CLOUD</span></span>
+    </div>
+    <div>Monza Cloud is an Atlanta-based, AI-centered custom application development company that offers nearshore, onshore, hiring and complete delivery across public and private clouds. Learn more at <a href="https://www.monzacloud.com">monzacloud.com</a>.</div>
+  </div>
+</section>
+
+</body>
+</html>

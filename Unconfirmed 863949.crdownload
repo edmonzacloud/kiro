@@ -1,0 +1,235 @@
+#!/usr/bin/env python3
+"""
+Build a single-slide .pptx (Letter landscape-proportioned page) for the HBS/Nova
+image page, branded in Monza navy/cyan, with 3 picture placeholders + captions.
+Hand-authored OOXML, zipped with the stdlib. No external libraries needed.
+"""
+import zipfile, os
+
+# ---- EMU helpers (1 inch = 914400 EMU) ----
+EMU = 914400
+def inch(v): return int(round(v * EMU))
+
+# Letter portrait 8.5 x 11 to match the case study page
+SLIDE_W = inch(8.5)
+SLIDE_H = inch(11)
+
+NAVY = "16205A"
+CYAN = "29B6D8"
+CYAN_L = "35C6E6"
+INK = "2B2F45"
+GREY = "5A6072"
+SOFT = "EEF2FB"
+LINE = "C7D0E6"
+
+def box(x, y, w, h):
+    return f'<a:off x="{inch(x)}" y="{inch(y)}"/><a:ext cx="{inch(w)}" cy="{inch(h)}"/>'
+
+def rect(sp_id, name, x, y, w, h, fill=None, line=None, line_w=1):
+    fillxml = f'<a:solidFill><a:srgbClr val="{fill}"/></a:solidFill>' if fill else '<a:noFill/>'
+    if line:
+        lnxml = f'<a:ln w="{int(line_w*12700)}"><a:solidFill><a:srgbClr val="{line}"/></a:solidFill></a:ln>'
+    else:
+        lnxml = '<a:ln><a:noFill/></a:ln>'
+    return f'''<p:sp><p:nvSpPr><p:cNvPr id="{sp_id}" name="{name}"/><p:cNvSpPr/><p:nvPr/></p:nvSpPr>
+<p:spPr><a:xfrm>{box(x,y,w,h)}</a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom>{fillxml}{lnxml}</p:spPr>
+<p:txBody><a:bodyPr/><a:lstStyle/><a:p/></p:txBody></p:sp>'''
+
+def runs(parts):
+    # parts: list of (text, size_pt, color, bold, italic)
+    out = []
+    for text, size, color, bold, italic in parts:
+        b = ' b="1"' if bold else ''
+        i = ' i="1"' if italic else ''
+        text = (text.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;'))
+        out.append(f'<a:r><a:rPr lang="en-US" sz="{int(size*100)}"{b}{i}>'
+                    f'<a:solidFill><a:srgbClr val="{color}"/></a:solidFill>'
+                    f'<a:latin typeface="Segoe UI"/></a:rPr><a:t>{text}</a:t></a:r>')
+    return ''.join(out)
+
+def textbox(sp_id, name, x, y, w, h, paragraphs, align="l", anchor="t", wrap=True):
+    # paragraphs: list of (parts, space_after_pt)
+    ps = []
+    for parts, sa in paragraphs:
+        spc = f'<a:spcAft><a:spcPts val="{int(sa*100)}"/></a:spcAft>' if sa else ''
+        ps.append(f'<a:p><a:pPr algn="{align}">{spc}</a:pPr>{runs(parts)}</a:p>')
+    wrapattr = 'square' if wrap else 'none'
+    return f'''<p:sp><p:nvSpPr><p:cNvPr id="{sp_id}" name="{name}"/><p:cNvSpPr txBox="1"/><p:nvPr/></p:nvSpPr>
+<p:spPr><a:xfrm>{box(x,y,w,h)}</a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom><a:noFill/></p:spPr>
+<p:txBody><a:bodyPr wrap="{wrapattr}" anchor="{anchor}" lIns="0" tIns="0" rIns="0" bIns="0"/><a:lstStyle/>{''.join(ps)}</p:txBody></p:sp>'''
+
+def placeholder(sp_id, name, x, y, w, h, label):
+    # dashed-border box with centered label; user replaces by inserting a picture
+    body = (f'<p:txBody><a:bodyPr anchor="ctr" wrap="square"/><a:lstStyle/>'
+            f'<a:p><a:pPr algn="ctr"/>'
+            f'<a:r><a:rPr lang="en-US" sz="1100" b="1"><a:solidFill><a:srgbClr val="{GREY}"/></a:solidFill><a:latin typeface="Segoe UI"/></a:rPr>'
+            f'<a:t>{label}</a:t></a:r></a:p>'
+            f'<a:p><a:pPr algn="ctr"/>'
+            f'<a:r><a:rPr lang="en-US" sz="800"><a:solidFill><a:srgbClr val="{GREY}"/></a:solidFill><a:latin typeface="Segoe UI"/></a:rPr>'
+            f'<a:t>Right-click &#8594; Change Picture, or Insert &#8594; Pictures, to place your screenshot here</a:t></a:r></a:p></p:txBody>')
+    dash = f'<a:ln w="25400" cap="flat"><a:solidFill><a:srgbClr val="B9C2DD"/></a:solidFill><a:prstDash val="dash"/></a:ln>'
+    return f'''<p:sp><p:nvSpPr><p:cNvPr id="{sp_id}" name="{name}"/><p:cNvSpPr/><p:nvPr/></p:nvSpPr>
+<p:spPr><a:xfrm>{box(x,y,w,h)}</a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom>
+<a:solidFill><a:srgbClr val="F4F6FB"/></a:solidFill>{dash}</p:spPr>{body}</p:sp>'''
+
+M = 0.62  # page side margin, matches the case study
+CW = 8.5 - 2*M  # content width = 7.26
+
+shapes = []
+sid = 2
+
+# --- Top navy band with kicker + title ---
+shapes.append(rect(sid, "topband", 0, 0, 8.5, 1.55, fill=NAVY)); sid+=1
+shapes.append(textbox(sid, "brand", M, 0.26, CW, 0.3,
+    [([("MONZA CLOUD   ·   CASE STUDY", 10, CYAN_L, True, False)], 0)], align="l")); sid+=1
+shapes.append(textbox(sid, "title", M, 0.58, CW, 0.8,
+    [([("Phase 2: Building Nova's Foundation", 24, "FFFFFF", True, False)], 0)], align="l")); sid+=1
+
+# --- Intro line ---
+shapes.append(textbox(sid, "intro", M, 1.8, CW, 0.9,
+    [([("A first look at Nova in active development — the new desktop shell, "
+        "core navigation, and in-platform notifications taking shape across early Phase 2.",
+        12, INK, False, False)], 0)], align="l")); sid+=1
+
+# --- Hero placeholder (ANM) ---
+hero_y = 2.75
+hero_h = 4.2
+shapes.append(placeholder(sid, "hero_img", M, hero_y, CW, hero_h,
+    "IMAGE 1 — ANM with Menu (hero)")); sid+=1
+shapes.append(textbox(sid, "hero_cap", M, hero_y+hero_h+0.06, CW, 0.35,
+    [([("Nova, in active development. ", 9, NAVY, True, False),
+       ("The new desktop shell — core navigation and a modern detail view — taking shape in early Phase 2.",
+        9, GREY, False, False)], 0)], align="l")); sid+=1
+
+# --- Two placeholders side by side ---
+pair_y = hero_y + hero_h + 0.55
+pair_h = 2.55
+gap = 0.25
+pw = (CW - gap) / 2
+# left
+shapes.append(placeholder(sid, "img2", M, pair_y, pw, pair_h,
+    "IMAGE 2 — Notifications")); sid+=1
+shapes.append(textbox(sid, "cap2", M, pair_y+pair_h+0.05, pw, 0.35,
+    [([("Notifications. ", 9, NAVY, True, False),
+       ("In-platform alerts keep dealership teams aligned.", 9, GREY, False, False)], 0)], align="l")); sid+=1
+# right
+rx = M + pw + gap
+shapes.append(placeholder(sid, "img3", rx, pair_y, pw, pair_h,
+    "IMAGE 3 — Notification detail")); sid+=1
+shapes.append(textbox(sid, "cap3", rx, pair_y+pair_h+0.05, pw, 0.35,
+    [([("At a glance. ", 9, NAVY, True, False),
+       ("A consolidated view of what needs attention.", 9, GREY, False, False)], 0)], align="l")); sid+=1
+
+# --- thin cyan rule under title area for brand feel ---
+shapes.append(rect(sid, "accent", M, 1.5, 1.3, 0.05, fill=CYAN)); sid+=1
+
+slide_xml = f'''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<p:sld xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main">
+<p:cSld><p:spTree>
+<p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr>
+<p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr>
+{''.join(shapes)}
+</p:spTree></p:cSld><p:clrMapOvr><a:overrideClrMapping bg1="lt1" tx1="dk1" bg2="lt2" tx2="dk2" accent1="accent1" accent2="accent2" accent3="accent3" accent4="accent4" accent5="accent5" accent6="accent6" hlink="hlink" folHlink="folHlink"/></p:clrMapOvr></p:sld>'''
+
+# ---------- static parts ----------
+content_types = '''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+<Default Extension="xml" ContentType="application/xml"/>
+<Override PartName="/ppt/presentation.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.presentation.main+xml"/>
+<Override PartName="/ppt/slides/slide1.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slide+xml"/>
+<Override PartName="/ppt/slideLayouts/slideLayout1.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slideLayout+xml"/>
+<Override PartName="/ppt/slideMasters/slideMaster1.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slideMaster+xml"/>
+<Override PartName="/ppt/theme/theme1.xml" ContentType="application/vnd.openxmlformats-officedocument.theme+xml"/>
+</Types>'''
+
+root_rels = '''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="ppt/presentation.xml"/>
+</Relationships>'''
+
+presentation = f'''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<p:presentation xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main">
+<p:sldMasterIdLst><p:sldMasterId id="2147483648" r:id="rId1"/></p:sldMasterIdLst>
+<p:sldIdLst><p:sldId id="256" r:id="rId2"/></p:sldIdLst>
+<p:sldSz cx="{SLIDE_W}" cy="{SLIDE_H}"/>
+<p:notesSz cx="{SLIDE_H}" cy="{SLIDE_W}"/>
+</p:presentation>'''
+
+presentation_rels = '''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideMaster" Target="slideMasters/slideMaster1.xml"/>
+<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slide" Target="slides/slide1.xml"/>
+<Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme" Target="theme/theme1.xml"/>
+</Relationships>'''
+
+slide_rels = '''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideLayout" Target="../slideLayouts/slideLayout1.xml"/>
+</Relationships>'''
+
+slide_master = '''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<p:sldMaster xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main">
+<p:cSld><p:bg><p:bgPr><a:solidFill><a:srgbClr val="FFFFFF"/></a:solidFill><a:effectLst/></p:bgPr></p:bg>
+<p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr>
+<p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr>
+</p:spTree></p:cSld><p:clrMap bg1="lt1" tx1="dk1" bg2="lt2" tx2="dk2" accent1="accent1" accent2="accent2" accent3="accent3" accent4="accent4" accent5="accent5" accent6="accent6" hlink="hlink" folHlink="folHlink"/>
+<p:sldLayoutIdLst><p:sldLayoutId id="2147483649" r:id="rId1"/></p:sldLayoutIdLst></p:sldMaster>'''
+
+slide_master_rels = '''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideLayout" Target="../slideLayouts/slideLayout1.xml"/>
+<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme" Target="../theme/theme1.xml"/>
+</Relationships>'''
+
+slide_layout = '''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<p:sldLayout xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main" type="blank" preserve="1">
+<p:cSld name="Blank"><p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr>
+<p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr>
+</p:spTree></p:cSld><p:clrMapOvr><a:overrideClrMapping bg1="lt1" tx1="dk1" bg2="lt2" tx2="dk2" accent1="accent1" accent2="accent2" accent3="accent3" accent4="accent4" accent5="accent5" accent6="accent6" hlink="hlink" folHlink="folHlink"/></p:clrMapOvr></p:sldLayout>'''
+
+slide_layout_rels = '''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideMaster" Target="../slideMasters/slideMaster1.xml"/>
+</Relationships>'''
+
+theme = '''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<a:theme xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" name="Office Theme">
+<a:themeElements>
+<a:clrScheme name="Office"><a:dk1><a:sysClr val="windowText" lastClr="000000"/></a:dk1><a:lt1><a:sysClr val="window" lastClr="FFFFFF"/></a:lt1>
+<a:dk2><a:srgbClr val="16205A"/></a:dk2><a:lt2><a:srgbClr val="EEF2FB"/></a:lt2>
+<a:accent1><a:srgbClr val="29B6D8"/></a:accent1><a:accent2><a:srgbClr val="35C6E6"/></a:accent2>
+<a:accent3><a:srgbClr val="1B2A6B"/></a:accent3><a:accent4><a:srgbClr val="5A6072"/></a:accent4>
+<a:accent5><a:srgbClr val="AEB7DD"/></a:accent5><a:accent6><a:srgbClr val="243A8A"/></a:accent6>
+<a:hlink><a:srgbClr val="29B6D8"/></a:hlink><a:folHlink><a:srgbClr val="1B2A6B"/></a:folHlink></a:clrScheme>
+<a:fontScheme name="Office"><a:majorFont><a:latin typeface="Segoe UI"/><a:ea typeface=""/><a:cs typeface=""/></a:majorFont>
+<a:minorFont><a:latin typeface="Segoe UI"/><a:ea typeface=""/><a:cs typeface=""/></a:minorFont></a:fontScheme>
+<a:fmtScheme name="Office"><a:fillStyleLst><a:solidFill><a:schemeClr val="phClr"/></a:solidFill>
+<a:gradFill rotWithShape="1"><a:gsLst><a:gs pos="0"><a:schemeClr val="phClr"/></a:gs><a:gs pos="100000"><a:schemeClr val="phClr"/></a:gs></a:gsLst><a:lin ang="5400000" scaled="0"/></a:gradFill>
+<a:gradFill rotWithShape="1"><a:gsLst><a:gs pos="0"><a:schemeClr val="phClr"/></a:gs><a:gs pos="100000"><a:schemeClr val="phClr"/></a:gs></a:gsLst><a:lin ang="5400000" scaled="0"/></a:gradFill></a:fillStyleLst>
+<a:lnStyleLst><a:ln w="6350" cap="flat" cmpd="sng" algn="ctr"><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:prstDash val="solid"/></a:ln>
+<a:ln w="12700" cap="flat" cmpd="sng" algn="ctr"><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:prstDash val="solid"/></a:ln>
+<a:ln w="19050" cap="flat" cmpd="sng" algn="ctr"><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:prstDash val="solid"/></a:ln></a:lnStyleLst>
+<a:effectStyleLst><a:effectStyle><a:effectLst/></a:effectStyle><a:effectStyle><a:effectLst/></a:effectStyle><a:effectStyle><a:effectLst/></a:effectStyle></a:effectStyleLst>
+<a:bgFillStyleLst><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:solidFill><a:schemeClr val="phClr"/></a:solidFill></a:bgFillStyleLst></a:fmtScheme>
+</a:themeElements></a:theme>'''
+
+parts = {
+    "[Content_Types].xml": content_types,
+    "_rels/.rels": root_rels,
+    "ppt/presentation.xml": presentation,
+    "ppt/_rels/presentation.xml.rels": presentation_rels,
+    "ppt/slides/slide1.xml": slide_xml,
+    "ppt/slides/_rels/slide1.xml.rels": slide_rels,
+    "ppt/slideMasters/slideMaster1.xml": slide_master,
+    "ppt/slideMasters/_rels/slideMaster1.xml.rels": slide_master_rels,
+    "ppt/slideLayouts/slideLayout1.xml": slide_layout,
+    "ppt/slideLayouts/_rels/slideLayout1.xml.rels": slide_layout_rels,
+    "ppt/theme/theme1.xml": theme,
+}
+
+out = "/projects/sandbox/HBS-Nova-ImagePage.pptx"
+with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as z:
+    for name, data in parts.items():
+        z.writestr(name, data)
+print("wrote", out, os.path.getsize(out), "bytes")
